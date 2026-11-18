@@ -4,6 +4,7 @@
 export interface TerrainType {
   name: string;
   passable: boolean;
+  itemYield?: string;
 }
 
 const gravelTerrain: TerrainType = {
@@ -14,11 +15,13 @@ const gravelTerrain: TerrainType = {
 const sandstoneTerrain: TerrainType = {
   name: "sandstone",
   passable: true,
+  itemYield: "bone",
 };
 
 const sandTerrain: TerrainType = {
   name: "sand",
   passable: true,
+  itemYield: "sandyBone",
 };
 
 const rockyTerrain: TerrainType = {
@@ -47,6 +50,10 @@ export function terrainAt(seed: number, x: number, y: number): TerrainType {
 
 export function isPassable(terrain: TerrainType): boolean {
   return terrain.passable;
+}
+
+export function isGatherable(terrain: TerrainType): boolean {
+  return terrain.itemYield !== undefined;
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so

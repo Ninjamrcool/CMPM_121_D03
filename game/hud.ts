@@ -10,6 +10,10 @@ function describe(event: GameEvent): string {
       return `moved to ${event.to.x}, ${event.to.y}`;
     case "blocked":
       return `blocked by ${event.terrain.name} at ${event.toward.x}, ${event.toward.y}`;
+    case "gathered":
+      return `gathered ${event.item} at ${event.at.x}, ${event.at.y}`;
+    case "failedGather":
+      return `failed gather at ${event.at.x}, ${event.at.y}`;
   }
 }
 
@@ -26,10 +30,20 @@ export class Hud {
   show(event: GameEvent) {
     element("live").textContent = describe(event);
     if (event.type === "moved") this.showPosition(event.to.x, event.to.y);
+    if (event.type === "gathered") this.updateInventory(event.inventory);
   }
 
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
     element("terrain").textContent = terrainAt(this.seed, x, y).name;
+  }
+
+  private updateInventory(inventory: Record<string, number>) {
+    let text = "";
+    for (const [item, count] of Object.entries(inventory)) {
+      text += `${item} x${count}, `;
+    }
+    text = text.substring(0, text.length - 2);
+    element("inventory").textContent = text;
   }
 }

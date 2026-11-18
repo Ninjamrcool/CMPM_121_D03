@@ -8,20 +8,34 @@ export type Cell = { x: number; y: number };
 
 export type Direction = "north" | "south" | "east" | "west";
 
+type ChangedCell = {
+  cell: Cell;
+  terrain: string;
+};
+
 // Plain data that survives JSON. Terrain is absent because the seed can recompute
 // it: besides the seed, only what the player has caused belongs here.
 export type GameState = {
   seed: number;
   player: Cell;
+  changedCells: ChangedCell[];
+  inventory: Record<string, number>;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
-export type Command = { type: "move"; direction: Direction };
+export type Command = { type: "move" | "gather"; direction: Direction };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
-  | { type: "blocked"; at: Cell; toward: Cell; terrain: TerrainType };
+  | { type: "blocked"; at: Cell; toward: Cell; terrain: TerrainType }
+  | {
+    type: "gathered";
+    at: Cell;
+    item: string;
+    inventory: Record<string, number>;
+  }
+  | { type: "failedGather"; at: Cell };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -32,7 +46,7 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 } };
+  return { seed, player: { x: 0, y: 0 }, changedCells: [], inventory: {} };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -40,6 +54,8 @@ export function apply(state: GameState, command: Command): GameEvent[] {
   switch (command.type) {
     case "move":
       return move(state, command.direction);
+    case "gather":
+      return gather(state);
   }
 }
 
@@ -60,4 +76,26 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   state.player.x = to.x;
   state.player.y = to.y;
   return [{ type: "moved", from, to }];
+}
+
+function gather(state: GameState): GameEvent[] {
+  const terrain = terrainAt(state.seed, state.player.x, state.player.y);
+
+  if (terrain.itemYield === undefined) {
+    return [{ type: "failedGather", at: state.player }];
+  }
+
+  if (state.inventory[terrain.itemYield] === undefined) {
+    state.inventory[terrain.itemYield] = 1;
+  } else {
+    state.inventory[terrain.itemYield] += 1;
+  }
+
+  const gatherPosition: Cell = { ...state.player };
+  return [{
+    type: "gathered",
+    at: gatherPosition,
+    item: terrain.itemYield,
+    inventory: { ...state.inventory },
+  }];
 }
