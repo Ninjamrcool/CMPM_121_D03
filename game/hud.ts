@@ -9,7 +9,7 @@ function describe(event: GameEvent): string {
     case "moved":
       return `moved to ${event.to.x}, ${event.to.y}`;
     case "blocked":
-      return `blocked by ${event.terrain} at ${event.toward.x}, ${event.toward.y}`;
+      return `blocked by ${event.terrain.name} at ${event.toward.x}, ${event.toward.y}`;
   }
 }
 
@@ -30,6 +30,6 @@ export class Hud {
 
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
-    element("terrain").textContent = terrainAt(this.seed, x, y);
+    element("terrain").textContent = terrainAt(this.seed, x, y).name;
   }
 }

@@ -2,7 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
-import { isPassable, type Terrain, terrainAt } from "./terrain.ts";
+import { isPassable, terrainAt, type TerrainType } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -21,7 +21,7 @@ export type Command = { type: "move"; direction: Direction };
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
-  | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain };
+  | { type: "blocked"; at: Cell; toward: Cell; terrain: TerrainType };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -44,17 +44,19 @@ export function apply(state: GameState, command: Command): GameEvent[] {
 }
 
 function move(state: GameState, direction: Direction): GameEvent[] {
-  const step = STEPS[direction];
+  const step: Cell = STEPS[direction];
   // Events are retained and played back later, while state keeps changing. So an
   // event gets cells of its own, never an object that state still holds.
   // Aliasing Bug: https://martinfowler.com/bliki/AliasingBug.html
   // Cells in events act as a Value Object: https://martinfowler.com/bliki/ValueObject.html
-  const from = { ...state.player };
-  const to = { x: from.x + step.x, y: from.y + step.y };
+  const from: Cell = { ...state.player };
+  const to: Cell = { x: from.x + step.x, y: from.y + step.y };
+
   const terrain = terrainAt(state.seed, to.x, to.y);
   if (!isPassable(terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
+
   state.player.x = to.x;
   state.player.y = to.y;
   return [{ type: "moved", from, to }];

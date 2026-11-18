@@ -1,7 +1,7 @@
 // The only folder allowed to import Phaser, and for one job: drawing the grid.
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
-import type { Cell, GameEvent, GameState, Terrain } from "../../core/mod.ts";
+import type { Cell, GameEvent, GameState } from "../../core/mod.ts";
 import { terrainAt } from "../../core/mod.ts";
 
 export const CELL_SIZE = 32;
@@ -12,11 +12,12 @@ const BUMP_MS = 60;
 const MARKER_COLOR = 0xf5e6a8;
 const BUMP_COLOR = 0xe0533d;
 
-const TERRAIN_COLORS: Record<Terrain, number> = {
-  grass: 0x5d9e4a,
-  forest: 0x2f6b3a,
-  water: 0x2d5f9e,
-  rock: 0x6e6a66,
+const TERRAIN_COLORS: Record<string, number> = {
+  gravel: 0x929C95,
+  sandstone: 0xB07251,
+  rocky: 0x38403E,
+  water: 0x339E99,
+  sand: 0xE0D184,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -126,7 +127,7 @@ export class GridView extends Phaser.Scene {
     this.ground.clear();
     for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
       for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
-        this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y)]);
+        this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y).name]);
         this.ground.fillRect(
           x * CELL_SIZE,
           y * CELL_SIZE,

@@ -5,7 +5,7 @@ function sample(seed: number, originX = 0, originY = 0): string[] {
   const cells: string[] = [];
   for (let y = originY - 30; y < originY + 30; y++) {
     for (let x = originX - 30; x < originX + 30; x++) {
-      cells.push(terrainAt(seed, x, y));
+      cells.push(terrainAt(seed, x, y).name);
     }
   }
   return cells;
