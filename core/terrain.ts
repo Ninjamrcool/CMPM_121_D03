@@ -2,12 +2,16 @@ import { ChangedCell } from "./rules.ts";
 
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
+export interface TerrainGatherInfo {
+  itemYield: string;
+  gatheredTerrain: TerrainType;
+  harvestChance: number;
+}
 
 export interface TerrainType {
   name: string;
   passable: boolean;
-  itemYield?: string;
-  gatheredTerrain?: TerrainType;
+  gatherInfo?: TerrainGatherInfo;
 }
 
 const gravelTerrain: TerrainType = {
@@ -23,8 +27,11 @@ const gatheredSandstoneTerrain: TerrainType = {
 const sandstoneTerrain: TerrainType = {
   name: "sandstone",
   passable: true,
-  itemYield: "bone",
-  gatheredTerrain: gatheredSandstoneTerrain,
+  gatherInfo: {
+    itemYield: "bone",
+    gatheredTerrain: gatheredSandstoneTerrain,
+    harvestChance: 0.1,
+  },
 };
 
 const gatheredSandTerrain: TerrainType = {
@@ -35,8 +42,11 @@ const gatheredSandTerrain: TerrainType = {
 const sandTerrain: TerrainType = {
   name: "sand",
   passable: true,
-  itemYield: "sandyBone",
-  gatheredTerrain: gatheredSandTerrain,
+  gatherInfo: {
+    itemYield: "sandyBone",
+    gatheredTerrain: gatheredSandTerrain,
+    harvestChance: 0.1,
+  },
 };
 
 const rockyTerrain: TerrainType = {
@@ -50,6 +60,19 @@ const waterTerrain: TerrainType = {
 };
 
 export function terrainAt(
+  changedCells: ChangedCell[],
+  seed: number,
+  x: number,
+  y: number,
+): TerrainType {
+  let terrain = checkTerrainChanged(changedCells, x, y);
+  if (terrain === undefined) {
+    terrain = naturalTerrainAt(seed, x, y);
+  }
+  return terrain;
+}
+
+export function naturalTerrainAt(
   seed: number,
   x: number,
   y: number,
@@ -85,7 +108,24 @@ export function isPassable(terrain: TerrainType): boolean {
 }
 
 export function isGatherable(terrain: TerrainType): boolean {
-  return terrain.itemYield !== undefined;
+  return terrain.gatherInfo !== undefined;
+}
+
+export function willHarvestItem(
+  seed: number,
+  x: number,
+  y: number,
+  terrain: TerrainType,
+): boolean {
+  if (terrain.gatherInfo === undefined) {
+    return false;
+  }
+
+  if (gridValue(seed, x, y) > terrain.gatherInfo.harvestChance) {
+    return false;
+  }
+
+  return true;
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so

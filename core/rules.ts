@@ -3,10 +3,10 @@
 // apply() decides how, or whether, to show them over time.
 
 import {
-  checkTerrainChanged,
   isPassable,
   terrainAt,
   type TerrainType,
+  willHarvestItem,
 } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
@@ -18,8 +18,7 @@ export type ChangedCell = {
   terrain: TerrainType;
 };
 
-// Plain data that survives JSON. Terrain is absent because the seed can recompute
-// it: besides the seed, only what the player has caused belongs here.
+// Plain data that survives JSON. Besides the seed, only what the player has caused belongs here.
 export type GameState = {
   seed: number;
   player: Cell;
@@ -37,7 +36,7 @@ export type GameEvent =
   | {
     type: "gathered";
     at: Cell;
-    item: string;
+    item?: string;
     inventory: Record<string, number>;
     changedCell: ChangedCell;
   }
@@ -74,7 +73,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const from: Cell = { ...state.player };
   const to: Cell = { x: from.x + step.x, y: from.y + step.y };
 
-  const terrain = terrainAt(state.seed, to.x, to.y);
+  const terrain = terrainAt(state.changedCells, state.seed, to.x, to.y);
   if (!isPassable(terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
@@ -85,46 +84,45 @@ function move(state: GameState, direction: Direction): GameEvent[] {
 }
 
 function gather(state: GameState): GameEvent[] {
-  let terrain = checkTerrainChanged(
+  const terrain = terrainAt(
     state.changedCells,
+    state.seed,
     state.player.x,
     state.player.y,
   );
-  if (terrain === undefined) {
-    terrain = terrainAt(
-      state.seed,
-      state.player.x,
-      state.player.y,
-    );
-  }
   const gatherPosition: Cell = { ...state.player };
 
-  if (terrain.itemYield === undefined) {
+  if (terrain.gatherInfo === undefined) {
     return [{ type: "failedGather", at: gatherPosition }];
-  }
-  if (terrain.gatheredTerrain === undefined) {
-    throw new Error(
-      `terrain ${terrain.name} has itemYield but no gatheredTerrain`,
-    );
-  }
-
-  if (state.inventory[terrain.itemYield] === undefined) {
-    state.inventory[terrain.itemYield] = 1;
-  } else {
-    state.inventory[terrain.itemYield] += 1;
   }
 
   const changedCell: ChangedCell = {
     cell: { ...gatherPosition },
-    terrain: terrain.gatheredTerrain,
+    terrain: terrain.gatherInfo.gatheredTerrain,
   };
   state.changedCells.push(changedCell);
+
+  if (!willHarvestItem(state.seed, state.player.x, state.player.y, terrain)) {
+    return [{
+      type: "gathered",
+      at: gatherPosition,
+      item: undefined,
+      inventory: { ...state.inventory },
+      changedCell: { ...changedCell, cell: { ...changedCell.cell } },
+    }];
+  }
+
+  if (state.inventory[terrain.gatherInfo.itemYield] === undefined) {
+    state.inventory[terrain.gatherInfo.itemYield] = 1;
+  } else {
+    state.inventory[terrain.gatherInfo.itemYield] += 1;
+  }
 
   return [{
     type: "gathered",
     at: gatherPosition,
-    item: terrain.itemYield,
+    item: terrain.gatherInfo.itemYield,
     inventory: { ...state.inventory },
-    changedCell: { ...changedCell },
+    changedCell: { ...changedCell, cell: { ...changedCell.cell } },
   }];
 }

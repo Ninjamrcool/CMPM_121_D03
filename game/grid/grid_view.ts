@@ -7,7 +7,7 @@ import type {
   GameEvent,
   GameState,
 } from "../../core/mod.ts";
-import { checkTerrainChanged, terrainAt } from "../../core/mod.ts";
+import { terrainAt } from "../../core/mod.ts";
 
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -144,10 +144,7 @@ export class GridView extends Phaser.Scene {
     this.ground.clear();
     for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
       for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
-        let terrain = checkTerrainChanged(this.changedCells, x, y);
-        if (terrain === undefined) {
-          terrain = terrainAt(this.seed, x, y);
-        }
+        const terrain = terrainAt(this.changedCells, this.seed, x, y);
 
         this.ground.fillStyle(
           TERRAIN_COLORS[terrain.name],

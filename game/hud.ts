@@ -1,6 +1,5 @@
 import {
   type ChangedCell,
-  checkTerrainChanged,
   type GameEvent,
   type GameState,
   terrainAt,
@@ -17,6 +16,9 @@ function describe(event: GameEvent): string {
     case "blocked":
       return `blocked by ${event.terrain.name} at ${event.toward.x}, ${event.toward.y}`;
     case "gathered":
+      if (event.item === undefined) {
+        return `gathered nothing at ${event.at.x}, ${event.at.y}`;
+      }
       return `gathered ${event.item} at ${event.at.x}, ${event.at.y}`;
     case "failedGather":
       return `failed gather at ${event.at.x}, ${event.at.y}`;
@@ -49,11 +51,8 @@ export class Hud {
 
   private showPosition(x: number, y: number) {
     element("position").textContent = `${x}, ${y}`;
-    let terrain = checkTerrainChanged(this.changedCells, x, y);
-    if (terrain === undefined) {
-      terrain = terrainAt(this.seed, x, y);
-    }
 
+    const terrain = terrainAt(this.changedCells, this.seed, x, y);
     element("terrain").textContent = terrain.name;
   }
 

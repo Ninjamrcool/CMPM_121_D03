@@ -1,11 +1,11 @@
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
-import { isPassable, terrainAt } from "./mod.ts";
+import { isPassable, naturalTerrainAt } from "./mod.ts";
 
 function sample(seed: number, originX = 0, originY = 0): string[] {
   const cells: string[] = [];
   for (let y = originY - 30; y < originY + 30; y++) {
     for (let x = originX - 30; x < originX + 30; x++) {
-      cells.push(terrainAt(seed, x, y).name);
+      cells.push(naturalTerrainAt(seed, x, y).name);
     }
   }
   return cells;
@@ -32,7 +32,7 @@ Deno.test("no seed starts walled in", () => {
       for (const next of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
         const key = next.join();
         if (seen.has(key)) continue;
-        if (!isPassable(terrainAt(seed, next[0], next[1]))) continue;
+        if (!isPassable(naturalTerrainAt(seed, next[0], next[1]))) continue;
         seen.add(key);
         frontier.push({ x: next[0], y: next[1] });
       }

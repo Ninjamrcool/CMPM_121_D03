@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { apply, type GameState, isPassable, terrainAt } from "./mod.ts";
+import { apply, type GameState, isPassable, naturalTerrainAt } from "./mod.ts";
 
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
@@ -8,8 +8,8 @@ const SEED = 121;
 // Searching keeps these tests honest if the terrain formula changes.
 function besideEasternCell(passable: boolean): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = isPassable(terrainAt(SEED, x, 0));
-    const east = isPassable(terrainAt(SEED, x + 1, 0));
+    const here = isPassable(naturalTerrainAt(SEED, x, 0));
+    const east = isPassable(naturalTerrainAt(SEED, x + 1, 0));
     if (here && east === passable) {
       return {
         seed: SEED,
@@ -49,7 +49,7 @@ Deno.test("a blocked move changes nothing and reports why", () => {
     type: "blocked",
     at: { x, y },
     toward: target,
-    terrain: terrainAt(SEED, target.x, target.y),
+    terrain: naturalTerrainAt(SEED, target.x, target.y),
   }]);
 });
 
