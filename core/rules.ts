@@ -2,15 +2,20 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
-import { isPassable, terrainAt, type TerrainType } from "./terrain.ts";
+import {
+  checkTerrainChanged,
+  isPassable,
+  terrainAt,
+  type TerrainType,
+} from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
 
 export type Direction = "north" | "south" | "east" | "west";
 
-type ChangedCell = {
+export type ChangedCell = {
   cell: Cell;
-  terrain: string;
+  terrain: TerrainType;
 };
 
 // Plain data that survives JSON. Terrain is absent because the seed can recompute
@@ -34,6 +39,7 @@ export type GameEvent =
     at: Cell;
     item: string;
     inventory: Record<string, number>;
+    changedCell: ChangedCell;
   }
   | { type: "failedGather"; at: Cell };
 
@@ -79,10 +85,27 @@ function move(state: GameState, direction: Direction): GameEvent[] {
 }
 
 function gather(state: GameState): GameEvent[] {
-  const terrain = terrainAt(state.seed, state.player.x, state.player.y);
+  let terrain = checkTerrainChanged(
+    state.changedCells,
+    state.player.x,
+    state.player.y,
+  );
+  if (terrain === undefined) {
+    terrain = terrainAt(
+      state.seed,
+      state.player.x,
+      state.player.y,
+    );
+  }
+  const gatherPosition: Cell = { ...state.player };
 
   if (terrain.itemYield === undefined) {
-    return [{ type: "failedGather", at: state.player }];
+    return [{ type: "failedGather", at: gatherPosition }];
+  }
+  if (terrain.gatheredTerrain === undefined) {
+    throw new Error(
+      `terrain ${terrain.name} has itemYield but no gatheredTerrain`,
+    );
   }
 
   if (state.inventory[terrain.itemYield] === undefined) {
@@ -91,11 +114,17 @@ function gather(state: GameState): GameEvent[] {
     state.inventory[terrain.itemYield] += 1;
   }
 
-  const gatherPosition: Cell = { ...state.player };
+  const changedCell: ChangedCell = {
+    cell: { ...gatherPosition },
+    terrain: terrain.gatheredTerrain,
+  };
+  state.changedCells.push(changedCell);
+
   return [{
     type: "gathered",
     at: gatherPosition,
     item: terrain.itemYield,
     inventory: { ...state.inventory },
+    changedCell: { ...changedCell },
   }];
 }

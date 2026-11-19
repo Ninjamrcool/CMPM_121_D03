@@ -1,8 +1,13 @@
 // The only folder allowed to import Phaser, and for one job: drawing the grid.
 // Input, the HUD, sound, and the order of events all live outside it.
 import Phaser from "phaser";
-import type { Cell, GameEvent, GameState } from "../../core/mod.ts";
-import { terrainAt } from "../../core/mod.ts";
+import type {
+  Cell,
+  ChangedCell,
+  GameEvent,
+  GameState,
+} from "../../core/mod.ts";
+import { checkTerrainChanged, terrainAt } from "../../core/mod.ts";
 
 export const CELL_SIZE = 32;
 const VIEW_WIDTH = 800;
@@ -15,9 +20,11 @@ const BUMP_COLOR = 0xe0533d;
 const TERRAIN_COLORS: Record<string, number> = {
   gravel: 0x929C95,
   sandstone: 0xB07251,
+  gatheredSandstone: 0x704630,
   rocky: 0x38403E,
   water: 0x339E99,
   sand: 0xE0D184,
+  gatheredSand: 0xB0A271,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind
@@ -37,6 +44,7 @@ function cellCenter({ x, y }: Cell): Cell {
 export class GridView extends Phaser.Scene {
   private readonly seed: number;
   private readonly start: Cell;
+  private readonly changedCells: ChangedCell[];
   private ground!: Phaser.GameObjects.Graphics;
   private marker!: Phaser.GameObjects.Arc;
 
@@ -44,6 +52,7 @@ export class GridView extends Phaser.Scene {
     super("grid");
     this.seed = state.seed;
     this.start = { ...state.player };
+    this.changedCells = [...state.changedCells];
   }
 
   create() {
@@ -84,6 +93,8 @@ export class GridView extends Phaser.Scene {
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
+        this.changedCells.push(event.changedCell);
+        this.drawCellsAround(event.at);
         return Promise.resolve();
       case "failedGather":
         return Promise.resolve();
@@ -127,11 +138,20 @@ export class GridView extends Phaser.Scene {
 
   // Paint only what is near the camera. Asking the core again costs little, and
   // the world itself is never stored.
-  private drawCellsAround({ x: centerX, y: centerY }: Cell) {
+  private drawCellsAround(
+    { x: centerX, y: centerY }: Cell,
+  ) {
     this.ground.clear();
     for (let y = centerY - CELLS_DOWN; y <= centerY + CELLS_DOWN; y++) {
       for (let x = centerX - CELLS_ACROSS; x <= centerX + CELLS_ACROSS; x++) {
-        this.ground.fillStyle(TERRAIN_COLORS[terrainAt(this.seed, x, y).name]);
+        let terrain = checkTerrainChanged(this.changedCells, x, y);
+        if (terrain === undefined) {
+          terrain = terrainAt(this.seed, x, y);
+        }
+
+        this.ground.fillStyle(
+          TERRAIN_COLORS[terrain.name],
+        );
         this.ground.fillRect(
           x * CELL_SIZE,
           y * CELL_SIZE,

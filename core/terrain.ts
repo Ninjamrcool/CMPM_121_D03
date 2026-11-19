@@ -1,3 +1,5 @@
+import { ChangedCell } from "./rules.ts";
+
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
 
@@ -5,6 +7,7 @@ export interface TerrainType {
   name: string;
   passable: boolean;
   itemYield?: string;
+  gatheredTerrain?: TerrainType;
 }
 
 const gravelTerrain: TerrainType = {
@@ -12,16 +15,28 @@ const gravelTerrain: TerrainType = {
   passable: true,
 };
 
+const gatheredSandstoneTerrain: TerrainType = {
+  name: "gatheredSandstone",
+  passable: true,
+};
+
 const sandstoneTerrain: TerrainType = {
   name: "sandstone",
   passable: true,
   itemYield: "bone",
+  gatheredTerrain: gatheredSandstoneTerrain,
+};
+
+const gatheredSandTerrain: TerrainType = {
+  name: "gatheredSand",
+  passable: true,
 };
 
 const sandTerrain: TerrainType = {
   name: "sand",
   passable: true,
   itemYield: "sandyBone",
+  gatheredTerrain: gatheredSandTerrain,
 };
 
 const rockyTerrain: TerrainType = {
@@ -34,7 +49,11 @@ const waterTerrain: TerrainType = {
   passable: false,
 };
 
-export function terrainAt(seed: number, x: number, y: number): TerrainType {
+export function terrainAt(
+  seed: number,
+  x: number,
+  y: number,
+): TerrainType {
   const raw = 0.65 * noise(seed, x, y, 9) + 0.35 * noise(seed + 1, x, y, 3);
   // Every game starts at the origin, so flatten the land there. Otherwise some
   // seeds would start inside a lake or walled into a pocket.
@@ -46,6 +65,19 @@ export function terrainAt(seed: number, x: number, y: number): TerrainType {
   if (noiseValue < 0.35) return gravelTerrain;
   if (noiseValue < 0.65) return sandstoneTerrain;
   return sandTerrain;
+}
+
+export function checkTerrainChanged(
+  changedCells: ChangedCell[],
+  x: number,
+  y: number,
+): TerrainType | undefined {
+  for (const changedCell of changedCells) {
+    if (changedCell.cell.x === x && changedCell.cell.y === y) {
+      return changedCell.terrain;
+    }
+  }
+  return undefined;
 }
 
 export function isPassable(terrain: TerrainType): boolean {
