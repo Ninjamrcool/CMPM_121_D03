@@ -9,23 +9,27 @@ export interface TerrainGatherInfo {
 }
 
 export interface TerrainType {
+  id: string;
   name: string;
   passable: boolean;
   gatherInfo?: TerrainGatherInfo;
 }
 
 const gravelTerrain: TerrainType = {
-  name: "gravel",
+  id: "gravel",
+  name: "Gravel",
   passable: true,
 };
 
 const gatheredSandstoneTerrain: TerrainType = {
-  name: "gatheredSandstone",
+  id: "gatheredSandstone",
+  name: "Gathered Sandstone",
   passable: true,
 };
 
 const sandstoneTerrain: TerrainType = {
-  name: "sandstone",
+  id: "sandstone",
+  name: "Sandstone",
   passable: true,
   gatherInfo: {
     itemYield: "bone",
@@ -35,12 +39,14 @@ const sandstoneTerrain: TerrainType = {
 };
 
 const gatheredSandTerrain: TerrainType = {
-  name: "gatheredSand",
+  id: "gatheredSand",
+  name: "Gathered Sand",
   passable: true,
 };
 
 const sandTerrain: TerrainType = {
-  name: "sand",
+  id: "sand",
+  name: "Sand",
   passable: true,
   gatherInfo: {
     itemYield: "sandyBone",
@@ -50,12 +56,14 @@ const sandTerrain: TerrainType = {
 };
 
 const rockyTerrain: TerrainType = {
-  name: "rocky",
+  id: "rocky",
+  name: "Rocks",
   passable: false,
 };
 
 const waterTerrain: TerrainType = {
-  name: "water",
+  id: "water",
+  name: "Water",
   passable: false,
 };
 

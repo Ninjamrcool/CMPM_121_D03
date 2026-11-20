@@ -33,6 +33,7 @@ Deno.test("moving onto passable terrain moves the player", () => {
     type: "moved",
     from: { x, y },
     to: { x: x + 1, y },
+    direction: "east",
   }]);
 });
 
@@ -67,10 +68,12 @@ Deno.test("an event keeps its cells while state moves on", () => {
     type: "moved",
     from: { x, y },
     to: { x: x + 1, y },
+    direction: "east",
   }]);
   assertEquals(second, [{
     type: "moved",
     from: { x: x + 1, y },
     to: { x, y },
+    direction: "west",
   }]);
 });

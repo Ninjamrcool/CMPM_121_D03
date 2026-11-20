@@ -1,20 +1,31 @@
 /* The page around the grid. Everything here is yours to restyle. */
 body {
+  box-sizing: border-box;
   margin: 0;
-  background: #14161a;
-  color: #e8e4da;
+  min-height: 100dvh;
+
+  background: #CFAE78;
+  color: #363636;
+
+  border: 8px double #704B2B;
+
+  padding: 20px;
+
   font: 14px system-ui, sans-serif;
 }
 
 #app {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 32px;
   padding: 16px;
+  margin: 16px;
+  perspective: 1200px;
 }
 
 #grid canvas {
   display: block;
+  border: 6px solid #A17230;
   border-radius: 4px;
 }
 
@@ -24,6 +35,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background: #a38b63;
+  border: 6px solid #68491f;
+  border-radius: 16px;
+  height: 720px;
+  padding: 16px;
+  transform: rotateX(6deg);
+  transform-origin: top center;
 }
 
 #hud dl {
@@ -31,10 +49,11 @@ body {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 12px;
+  font-size: large;
 }
 
 #hud dt {
-  color: #8d8a82;
+  color: #202020;
 }
 
 #hud dd {
@@ -45,13 +64,13 @@ body {
   min-height: 1.4em;
   margin: 0;
   font-family: monospace;
-  color: #b7b3a8;
+  color: #202020;
 }
 
 #mute {
   align-self: start;
   padding: 4px 10px;
-  color: inherit;
+  color: #CFAE78;
   background: #262a31;
   border: 1px solid #3a3f48;
   border-radius: 4px;

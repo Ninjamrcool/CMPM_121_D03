@@ -4,18 +4,30 @@ import Phaser from "phaser";
 import type {
   Cell,
   ChangedCell,
+  Direction,
   GameEvent,
   GameState,
 } from "../../core/mod.ts";
 import { terrainAt } from "../../core/mod.ts";
 
-export const CELL_SIZE = 32;
-const VIEW_WIDTH = 800;
-const VIEW_HEIGHT = 600;
+export const CELL_SIZE = 40;
+const VIEW_WIDTH = 1000;
+const VIEW_HEIGHT = 750;
 const WALK_MS = 120;
 const BUMP_MS = 60;
-const MARKER_COLOR = 0xf5e6a8;
+const PLAYER_BODY_COLOR = 0xE8B672;
+const PLAYER_EYE_COLOR = 0x383838;
+const PLAYER_EYE_DISTANCE_FROM_CENTER = -11;
+const PLAYER_EYE_SEPARATION_DISTANCE = 7.5;
+const PLAYER_EYE_SIZE = 0.1;
 const BUMP_COLOR = 0xe0533d;
+
+const DIRECTION_ANGLES: Record<Direction, number> = {
+  north: 0,
+  south: 180,
+  east: 90,
+  west: 270,
+};
 
 const TERRAIN_COLORS: Record<string, number> = {
   gravel: 0x929C95,
@@ -46,7 +58,10 @@ export class GridView extends Phaser.Scene {
   private readonly start: Cell;
   private readonly changedCells: ChangedCell[];
   private ground!: Phaser.GameObjects.Graphics;
-  private marker!: Phaser.GameObjects.Arc;
+  private player!: Phaser.GameObjects.Container;
+  private playerBody!: Phaser.GameObjects.Arc;
+  private playerLeftEye!: Phaser.GameObjects.Arc;
+  private playerRightEye!: Phaser.GameObjects.Arc;
 
   constructor(state: GameState) {
     super("grid");
@@ -58,8 +73,31 @@ export class GridView extends Phaser.Scene {
   create() {
     this.ground = this.add.graphics();
     const { x, y } = cellCenter(this.start);
-    this.marker = this.add.circle(x, y, CELL_SIZE * 0.35, MARKER_COLOR);
-    this.cameras.main.startFollow(this.marker, true, 0.2, 0.2);
+    this.playerBody = this.add.circle(
+      0,
+      0,
+      CELL_SIZE * 0.35,
+      PLAYER_BODY_COLOR,
+    );
+    this.playerLeftEye = this.add.circle(
+      -1 * PLAYER_EYE_SEPARATION_DISTANCE,
+      PLAYER_EYE_DISTANCE_FROM_CENTER,
+      CELL_SIZE * PLAYER_EYE_SIZE,
+      PLAYER_EYE_COLOR,
+    );
+    this.playerRightEye = this.add.circle(
+      PLAYER_EYE_SEPARATION_DISTANCE,
+      PLAYER_EYE_DISTANCE_FROM_CENTER,
+      CELL_SIZE * PLAYER_EYE_SIZE,
+      PLAYER_EYE_COLOR,
+    );
+    this.player = this.add.container(x, y, [
+      this.playerBody,
+      this.playerLeftEye,
+      this.playerRightEye,
+    ]);
+
+    this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
     this.drawCellsAround(this.start);
     this.fitToDisplay();
   }
@@ -89,7 +127,7 @@ export class GridView extends Phaser.Scene {
     switch (event.type) {
       case "moved":
         this.drawCellsAround(event.to);
-        return this.walk(event.to);
+        return this.walk(event.to, event.direction);
       case "blocked":
         return this.bump(event.at, event.toward);
       case "gathered":
@@ -105,10 +143,12 @@ export class GridView extends Phaser.Scene {
     }
   }
 
-  private walk(to: Cell): Promise<void> {
+  private walk(to: Cell, direction: Direction): Promise<void> {
+    this.player.angle = DIRECTION_ANGLES[direction];
+
     return new Promise((done) => {
       this.tweens.add({
-        targets: this.marker,
+        targets: this.player,
         ...cellCenter(to),
         duration: WALK_MS,
         onComplete: () => done(),
@@ -120,16 +160,16 @@ export class GridView extends Phaser.Scene {
   private bump(at: Cell, toward: Cell): Promise<void> {
     const start = cellCenter(at);
     const target = cellCenter(toward);
-    this.marker.setFillStyle(BUMP_COLOR);
+    this.playerBody.setFillStyle(BUMP_COLOR);
     return new Promise((done) => {
       this.tweens.add({
-        targets: this.marker,
+        targets: this.player,
         x: start.x + (target.x - start.x) * 0.3,
         y: start.y + (target.y - start.y) * 0.3,
         duration: BUMP_MS,
         yoyo: true,
         onComplete: () => {
-          this.marker.setFillStyle(MARKER_COLOR);
+          this.playerBody.setFillStyle(PLAYER_BODY_COLOR);
           done();
         },
       });
@@ -147,7 +187,7 @@ export class GridView extends Phaser.Scene {
         const terrain = terrainAt(this.changedCells, this.seed, x, y);
 
         this.ground.fillStyle(
-          TERRAIN_COLORS[terrain.name],
+          TERRAIN_COLORS[terrain.id],
         );
         this.ground.fillRect(
           x * CELL_SIZE,

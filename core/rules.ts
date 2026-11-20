@@ -31,7 +31,7 @@ export type Command = { type: "move" | "gather"; direction: Direction };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
-  | { type: "moved"; from: Cell; to: Cell }
+  | { type: "moved"; from: Cell; to: Cell; direction: Direction }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: TerrainType }
   | {
     type: "gathered";
@@ -80,7 +80,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
 
   state.player.x = to.x;
   state.player.y = to.y;
-  return [{ type: "moved", from, to }];
+  return [{ type: "moved", from, to, direction: direction }];
 }
 
 function gather(state: GameState): GameEvent[] {
