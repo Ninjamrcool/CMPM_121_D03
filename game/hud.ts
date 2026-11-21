@@ -1,3 +1,4 @@
+import { ItemStack } from "../core/items.ts";
 import {
   type ChangedCell,
   type GameEvent,
@@ -56,10 +57,10 @@ export class Hud {
     element("terrain").textContent = terrain.name;
   }
 
-  private updateInventory(inventory: Record<string, number>) {
+  private updateInventory(inventory: ItemStack[]) {
     let text = "";
-    for (const [item, count] of Object.entries(inventory)) {
-      text += `${item} x${count}, `;
+    for (const itemStack of inventory) {
+      text += `${itemStack.type.name} x${itemStack.stackSize}, `;
     }
     text = text.substring(0, text.length - 2);
     element("inventory").textContent = text;

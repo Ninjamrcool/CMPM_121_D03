@@ -15,7 +15,7 @@ function besideEasternCell(passable: boolean): GameState {
         seed: SEED,
         player: { x, y: 0 },
         changedCells: [],
-        inventory: {},
+        inventory: [],
       };
     }
   }

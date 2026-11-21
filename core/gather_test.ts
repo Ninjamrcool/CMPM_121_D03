@@ -21,7 +21,7 @@ function findGatherableCell(gatherable: boolean): GameState {
         seed: SEED,
         player: { x, y: 0 },
         changedCells: [],
-        inventory: {},
+        inventory: [],
       };
     }
   }
@@ -36,7 +36,7 @@ function findWillHarvestCell(willGather: boolean): GameState {
         seed: SEED,
         player: { x, y: 0 },
         changedCells: [],
-        inventory: {},
+        inventory: [],
       };
     }
   }
@@ -56,7 +56,7 @@ function gatherableAndBesideEasternCell(
         seed: SEED,
         player: { x, y: 0 },
         changedCells: [],
-        inventory: {},
+        inventory: [],
       };
     }
   }

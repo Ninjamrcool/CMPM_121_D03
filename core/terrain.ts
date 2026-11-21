@@ -1,9 +1,10 @@
 import { ChangedCell } from "./rules.ts";
+import { items, type ItemType } from "./items.ts";
 
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
 export interface TerrainGatherInfo {
-  itemYield: string;
+  itemYield: ItemType;
   gatheredTerrain: TerrainType;
   harvestChance: number;
 }
@@ -21,21 +22,10 @@ const gravelTerrain: TerrainType = {
   passable: true,
 };
 
-const gatheredSandstoneTerrain: TerrainType = {
-  id: "gatheredSandstone",
-  name: "Gathered Sandstone",
-  passable: true,
-};
-
 const sandstoneTerrain: TerrainType = {
   id: "sandstone",
   name: "Sandstone",
   passable: true,
-  gatherInfo: {
-    itemYield: "bone",
-    gatheredTerrain: gatheredSandstoneTerrain,
-    harvestChance: 0.1,
-  },
 };
 
 const gatheredSandTerrain: TerrainType = {
@@ -49,7 +39,7 @@ const sandTerrain: TerrainType = {
   name: "Sand",
   passable: true,
   gatherInfo: {
-    itemYield: "sandyBone",
+    itemYield: items.vertebrae,
     gatheredTerrain: gatheredSandTerrain,
     harvestChance: 0.1,
   },

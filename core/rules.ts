@@ -8,6 +8,7 @@ import {
   type TerrainType,
   willHarvestItem,
 } from "./terrain.ts";
+import { type ItemStack } from "./items.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -23,7 +24,7 @@ export type GameState = {
   seed: number;
   player: Cell;
   changedCells: ChangedCell[];
-  inventory: Record<string, number>;
+  inventory: ItemStack[];
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -36,8 +37,8 @@ export type GameEvent =
   | {
     type: "gathered";
     at: Cell;
-    item?: string;
-    inventory: Record<string, number>;
+    item?: ItemStack;
+    inventory: ItemStack[];
     changedCell: ChangedCell;
   }
   | { type: "failedGather"; at: Cell };
@@ -51,7 +52,7 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, changedCells: [], inventory: {} };
+  return { seed, player: { x: 0, y: 0 }, changedCells: [], inventory: [] };
 }
 
 // The single way in. It updates the state it is given and returns the events.
@@ -107,22 +108,37 @@ function gather(state: GameState): GameEvent[] {
       type: "gathered",
       at: gatherPosition,
       item: undefined,
-      inventory: { ...state.inventory },
+      inventory: copyInventory(state.inventory),
       changedCell: { ...changedCell, cell: { ...changedCell.cell } },
     }];
   }
 
-  if (state.inventory[terrain.gatherInfo.itemYield] === undefined) {
-    state.inventory[terrain.gatherInfo.itemYield] = 1;
-  } else {
-    state.inventory[terrain.gatherInfo.itemYield] += 1;
+  let foundItem: boolean = false;
+  const itemYieldType = terrain.gatherInfo.itemYield;
+  for (const itemStack of state.inventory) {
+    if (itemStack.type === itemYieldType) {
+      itemStack.stackSize += 1;
+      foundItem = true;
+      break;
+    }
+  }
+  if (!foundItem) {
+    state.inventory.push({ type: itemYieldType, stackSize: 1 });
   }
 
   return [{
     type: "gathered",
     at: gatherPosition,
-    item: terrain.gatherInfo.itemYield,
-    inventory: { ...state.inventory },
+    item: { type: itemYieldType, stackSize: 1 },
+    inventory: copyInventory(state.inventory),
     changedCell: { ...changedCell, cell: { ...changedCell.cell } },
   }];
+}
+
+function copyInventory(inventory: ItemStack[]): ItemStack[] {
+  const inventoryCopy: ItemStack[] = [];
+  for (const itemStack of inventory) {
+    inventoryCopy.push({ ...itemStack });
+  }
+  return inventoryCopy;
 }
