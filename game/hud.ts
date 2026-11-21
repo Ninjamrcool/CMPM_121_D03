@@ -6,7 +6,7 @@ import {
   terrainAt,
 } from "../core/mod.ts";
 
-function element(id: string): HTMLElement {
+export function element(id: string): HTMLElement {
   return document.getElementById(id)!;
 }
 
@@ -46,10 +46,11 @@ export class Hud {
     element("live").textContent = describe(event);
     if (event.type === "moved") {
       this.showPosition(event.to.x, event.to.y);
-    }
-    if (event.type === "gathered") {
+    } else if (event.type === "gathered") {
       this.changedCells.push(event.changedCell);
       this.showPosition(event.at.x, event.at.y);
+      this.updateInventory(event.inventory);
+    } else if (event.type === "crafted") {
       this.updateInventory(event.inventory);
     }
   }

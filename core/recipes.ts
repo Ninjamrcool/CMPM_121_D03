@@ -62,3 +62,12 @@ export const recipes = {
   leg: legRecipe,
   tail: tailRecipe,
 };
+
+export const recipesList: Recipe[] = [
+  dinosaurRecipe,
+  headRecipe,
+  neckRecipe,
+  ribcageRecipe,
+  legRecipe,
+  tailRecipe,
+];

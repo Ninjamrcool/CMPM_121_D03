@@ -59,6 +59,11 @@ export class Controller {
     );
   }
 
+  public runCommand(command: Command) {
+    this.pressed = command;
+    this.next();
+  }
+
   private next() {
     // While the presenter is busy, input waits and the core hears nothing. The
     // busy state lives here in game/: the core never learns about animation.

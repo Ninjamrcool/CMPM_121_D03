@@ -20,6 +20,10 @@ export class Presenter {
     this.outputs = outputs;
   }
 
+  public addListener(output: Output) {
+    this.outputs.push(output);
+  }
+
   play(events: GameEvent[]) {
     this.queue.push(...events);
     if (!this.busy) this.playQueue();

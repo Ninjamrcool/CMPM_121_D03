@@ -136,11 +136,14 @@ function gather(state: GameState): GameEvent[] {
   }];
 }
 
-function itemsNeededToCraft(state: GameState, recipe: Recipe): ItemStack[] {
+export function itemsNeededToCraft(
+  inventory: ItemStack[],
+  recipe: Recipe,
+): ItemStack[] {
   const itemsNeeded: ItemStack[] = [];
 
   for (const requiredItem of recipe.items) {
-    const inventoryItem = state.inventory.find(
+    const inventoryItem = inventory.find(
       (item) => item.type === requiredItem.type,
     );
     if (!inventoryItem) {
@@ -157,7 +160,7 @@ function itemsNeededToCraft(state: GameState, recipe: Recipe): ItemStack[] {
 }
 
 function craft(state: GameState, recipe: Recipe): GameEvent[] {
-  if (itemsNeededToCraft(state, recipe).length > 0) {
+  if (itemsNeededToCraft(state.inventory, recipe).length > 0) {
     return [{ type: "failedCraft", result: recipe.result }];
   }
 

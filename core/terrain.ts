@@ -41,7 +41,7 @@ const sandTerrain: TerrainType = {
   gatherInfo: {
     itemYield: items.vertebrae,
     gatheredTerrain: gatheredSandTerrain,
-    harvestChance: 0.1,
+    harvestChance: 0.5,
   },
 };
 
