@@ -38,7 +38,7 @@ export class Controller {
 
   private keyDown(event: KeyboardEvent) {
     if (event.key === "e") {
-      this.pressed = { type: "gather", direction: "north" };
+      this.pressed = { type: "gather" };
       this.next();
       return;
     }

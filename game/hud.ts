@@ -20,9 +20,13 @@ function describe(event: GameEvent): string {
       if (event.item === undefined) {
         return `Gathered nothing at ${event.at.x}, ${event.at.y}`;
       }
-      return `Gathered ${event.item} at ${event.at.x}, ${event.at.y}`;
+      return `Gathered ${event.item.type.name} at ${event.at.x}, ${event.at.y}`;
     case "failedGather":
       return `Failed to gather at ${event.at.x}, ${event.at.y}`;
+    case "crafted":
+      return `Crafted ${event.result.type.name} x${event.result.stackSize}`;
+    case `failedCraft`:
+      return `Failed to craft ${event.result.type.name}, not enough items`;
   }
 }
 

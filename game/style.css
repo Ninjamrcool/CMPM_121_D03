@@ -52,12 +52,18 @@ body {
   font-size: large;
 }
 
-#hud dt {
-  color: #202020;
-}
-
 #hud dd {
   margin: 0;
+}
+
+#hud button {
+  width: 100%;
+}
+
+#recipes {
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 #live {
@@ -67,7 +73,7 @@ body {
   color: #202020;
 }
 
-#mute {
+button {
   align-self: start;
   padding: 4px 10px;
   color: #CFAE78;

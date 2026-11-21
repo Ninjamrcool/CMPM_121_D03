@@ -1,8 +1,6 @@
 import { items, ItemStack } from "./items.ts";
 
-export const recipes: Recipe[] = [];
-
-interface Recipe {
+export interface Recipe {
   items: ItemStack[];
   result: ItemStack;
 }
@@ -51,7 +49,16 @@ export const legRecipe: Recipe = {
 
 export const tailRecipe: Recipe = {
   items: [
-    { type: items.vertebrae, stackSize: 1 },
+    { type: items.vertebrae, stackSize: 8 },
   ],
   result: { type: items.tail, stackSize: 1 },
+};
+
+export const recipes = {
+  dinosaur: dinosaurRecipe,
+  head: headRecipe,
+  neck: neckRecipe,
+  ribcage: ribcageRecipe,
+  leg: legRecipe,
+  tail: tailRecipe,
 };

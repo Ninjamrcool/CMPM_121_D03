@@ -67,7 +67,7 @@ Deno.test("gather is successful on a gatherable tile, and an item successfully h
   const state = findWillHarvestCell(true);
   const { x, y } = state.player;
 
-  const events = apply(state, { type: "gather", direction: "north" });
+  const events = apply(state, { type: "gather" });
 
   assertEquals(Object.keys(state.inventory).length, 1);
   assertEquals(events[0].type, "gathered");
@@ -81,7 +81,7 @@ Deno.test("gather is successful on a gatherable tile, and inventory remains the 
   const state = findWillHarvestCell(false);
   const { x, y } = state.player;
 
-  const events = apply(state, { type: "gather", direction: "north" });
+  const events = apply(state, { type: "gather" });
 
   assertEquals(Object.keys(state.inventory).length, 0);
   assertEquals(events[0].type, "gathered");
@@ -95,7 +95,7 @@ Deno.test("gather is unsuccessful on a ungatherable tile and doesn't gather", ()
   const state = findGatherableCell(false);
   const { x, y } = state.player;
 
-  const events = apply(state, { type: "gather", direction: "north" });
+  const events = apply(state, { type: "gather" });
 
   assertEquals(Object.keys(state.inventory).length, 0);
   assertEquals(events[0].type, "failedGather");
@@ -111,7 +111,7 @@ Deno.test("gather is unsuccessful on a ungatherable tile and doesn't gather", ()
 Deno.test("gather event position remains unchanged after subsequent move commands", () => {
   const state = gatherableAndBesideEasternCell(true, true);
 
-  const gatherEvents = apply(state, { type: "gather", direction: "north" });
+  const gatherEvents = apply(state, { type: "gather" });
   assertEquals(gatherEvents[0].type, "gathered");
 
   if (gatherEvents[0].type === "gathered") {

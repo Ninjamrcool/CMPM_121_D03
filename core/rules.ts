@@ -9,6 +9,7 @@ import {
   willHarvestItem,
 } from "./terrain.ts";
 import { type ItemStack } from "./items.ts";
+import { type Recipe } from "./recipes.ts";
 
 export type Cell = { x: number; y: number };
 
@@ -28,7 +29,10 @@ export type GameState = {
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
-export type Command = { type: "move" | "gather"; direction: Direction };
+export type Command =
+  | { type: "move"; direction: Direction }
+  | { type: "gather" }
+  | { type: "craft"; recipe: Recipe };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
@@ -41,7 +45,9 @@ export type GameEvent =
     inventory: ItemStack[];
     changedCell: ChangedCell;
   }
-  | { type: "failedGather"; at: Cell };
+  | { type: "failedGather"; at: Cell }
+  | { type: "crafted"; result: ItemStack; inventory: ItemStack[] }
+  | { type: "failedCraft"; result: ItemStack };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -62,6 +68,8 @@ export function apply(state: GameState, command: Command): GameEvent[] {
       return move(state, command.direction);
     case "gather":
       return gather(state);
+    case "craft":
+      return craft(state, command.recipe);
   }
 }
 
@@ -113,18 +121,11 @@ function gather(state: GameState): GameEvent[] {
     }];
   }
 
-  let foundItem: boolean = false;
   const itemYieldType = terrain.gatherInfo.itemYield;
-  for (const itemStack of state.inventory) {
-    if (itemStack.type === itemYieldType) {
-      itemStack.stackSize += 1;
-      foundItem = true;
-      break;
-    }
-  }
-  if (!foundItem) {
-    state.inventory.push({ type: itemYieldType, stackSize: 1 });
-  }
+  addItemStackToInventory(state.inventory, {
+    type: itemYieldType,
+    stackSize: 1,
+  });
 
   return [{
     type: "gathered",
@@ -135,7 +136,65 @@ function gather(state: GameState): GameEvent[] {
   }];
 }
 
-function copyInventory(inventory: ItemStack[]): ItemStack[] {
+function itemsNeededToCraft(state: GameState, recipe: Recipe): ItemStack[] {
+  const itemsNeeded: ItemStack[] = [];
+
+  for (const requiredItem of recipe.items) {
+    const inventoryItem = state.inventory.find(
+      (item) => item.type === requiredItem.type,
+    );
+    if (!inventoryItem) {
+      addItemStackToInventory(itemsNeeded, requiredItem);
+    } else if (inventoryItem.stackSize < requiredItem.stackSize) {
+      addItemStackToInventory(itemsNeeded, {
+        type: requiredItem.type,
+        stackSize: requiredItem.stackSize - inventoryItem.stackSize,
+      });
+    }
+  }
+
+  return itemsNeeded;
+}
+
+function craft(state: GameState, recipe: Recipe): GameEvent[] {
+  if (itemsNeededToCraft(state, recipe).length > 0) {
+    return [{ type: "failedCraft", result: recipe.result }];
+  }
+
+  // Remove the required items from the inventory
+  for (const requiredItem of recipe.items) {
+    const inventoryItem = state.inventory.find(
+      (item) => item.type === requiredItem.type,
+    );
+    if (inventoryItem) {
+      inventoryItem.stackSize -= requiredItem.stackSize;
+      if (inventoryItem.stackSize <= 0) {
+        state.inventory.splice(state.inventory.indexOf(inventoryItem), 1);
+      }
+    }
+  }
+  addItemStackToInventory(state.inventory, { ...recipe.result });
+
+  return [{
+    type: "crafted",
+    result: { ...recipe.result },
+    inventory: copyInventory(state.inventory),
+  }];
+}
+
+function addItemStackToInventory(inventory: ItemStack[], itemStack: ItemStack) {
+  const itemType = itemStack.type;
+  for (const inventoryItemStack of inventory) {
+    if (inventoryItemStack.type === itemType) {
+      inventoryItemStack.stackSize += itemStack.stackSize;
+      return;
+    }
+  }
+
+  inventory.push(itemStack);
+}
+
+export function copyInventory(inventory: ItemStack[]): ItemStack[] {
   const inventoryCopy: ItemStack[] = [];
   for (const itemStack of inventory) {
     inventoryCopy.push({ ...itemStack });
