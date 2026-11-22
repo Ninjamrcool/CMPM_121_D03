@@ -35,11 +35,18 @@ const DIRECTION_ANGLES: Record<Direction, number> = {
 const TERRAIN_COLORS: Record<string, number> = {
   gravel: 0x929C95,
   sandstone: 0xB07251,
-  gatheredSandstone: 0x704630,
-  rocky: 0x38403E,
+  rocky: 0x202422,
   water: 0x339E99,
-  sand: 0xE0D184,
-  gatheredSand: 0xB0A271,
+  sand: 0xEBDF9D,
+  gatheredSand: 0xB5A882,
+  gatheredRocky: 0x38403E,
+  gatheredGravel: 0x6B7A73,
+  shale: 0x4A4A4A,
+  sulfuricRock: 0xF2C966,
+  mud: 0x664008,
+  gatheredShale: 0x707070,
+  gatheredMud: 0x665119,
+  gatheredSulfuricRock: 0xC7AC5D,
 };
 
 // Enough cells to cover the view, plus a margin so that the camera can lag behind

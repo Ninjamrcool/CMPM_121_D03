@@ -13,6 +13,7 @@ const ribcageItem: ItemType = { id: "ribcage", name: "Ribcage" };
 const legItem: ItemType = { id: "leg", name: "Leg" };
 const tailItem: ItemType = { id: "tail", name: "Tail" };
 const dinosaurItem: ItemType = { id: "dinosaur", name: "Dinosaur" };
+const boneLadderItem: ItemType = { id: "bone_ladder", name: "Bone Ladder" };
 
 export const items = {
   mandible: mandibleItem,
@@ -30,6 +31,7 @@ export const items = {
   leg: legItem,
   tail: tailItem,
   dinosaur: dinosaurItem,
+  boneLadder: boneLadderItem,
 };
 
 export interface ItemType {

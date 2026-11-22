@@ -48,8 +48,8 @@ function gatherableAndBesideEasternCell(
   gatherable: boolean,
 ): GameState {
   for (let x = 2; x < 10_000; x++) {
-    const here = isPassable(naturalTerrainAt(SEED, x, 0));
-    const east = isPassable(naturalTerrainAt(SEED, x + 1, 0));
+    const here = isPassable(naturalTerrainAt(SEED, x, 0), []);
+    const east = isPassable(naturalTerrainAt(SEED, x + 1, 0), []);
     const hereGatherable = isGatherable(naturalTerrainAt(SEED, x, 0));
     if (here && east === passable && hereGatherable === gatherable) {
       return {

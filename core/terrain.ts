@@ -1,10 +1,10 @@
 import { ChangedCell } from "./rules.ts";
-import { items, type ItemType } from "./items.ts";
+import { items, ItemStack, type ItemType } from "./items.ts";
 
 // The world is a pure function of a seed and coordinates. Nothing here is stored,
 // so the world can be effectively unbounded while saved state stays small.
 export interface TerrainGatherInfo {
-  itemYield: ItemType;
+  itemYields: ItemType[];
   gatheredTerrain: TerrainType;
   harvestChance: number;
 }
@@ -13,19 +13,31 @@ export interface TerrainType {
   id: string;
   name: string;
   passable: boolean;
+  itemToPass?: ItemType;
   gatherInfo?: TerrainGatherInfo;
 }
-
-const gravelTerrain: TerrainType = {
-  id: "gravel",
-  name: "Gravel",
-  passable: true,
-};
 
 const sandstoneTerrain: TerrainType = {
   id: "sandstone",
   name: "Sandstone",
   passable: true,
+};
+
+const gatheredGravelTerrain: TerrainType = {
+  id: "gatheredGravel",
+  name: "Gathered Gravel",
+  passable: true,
+};
+
+const gravelTerrain: TerrainType = {
+  id: "gravel",
+  name: "Gravel",
+  passable: true,
+  gatherInfo: {
+    itemYields: [items.toe],
+    gatheredTerrain: gatheredGravelTerrain,
+    harvestChance: 0.5,
+  },
 };
 
 const gatheredSandTerrain: TerrainType = {
@@ -39,16 +51,79 @@ const sandTerrain: TerrainType = {
   name: "Sand",
   passable: true,
   gatherInfo: {
-    itemYield: items.vertebrae,
+    itemYields: [items.vertebrae, items.rib],
     gatheredTerrain: gatheredSandTerrain,
     harvestChance: 0.5,
   },
+};
+
+const gatheredRockyTerrain: TerrainType = {
+  id: "gatheredRocky",
+  name: "Gathered Rocks",
+  passable: true,
 };
 
 const rockyTerrain: TerrainType = {
   id: "rocky",
   name: "Rocks",
   passable: false,
+  gatherInfo: {
+    itemYields: [items.mandible, items.cranium],
+    gatheredTerrain: gatheredRockyTerrain,
+    harvestChance: 0.5,
+  },
+  itemToPass: items.boneLadder,
+};
+
+const gatheredShaleTerrain: TerrainType = {
+  id: "gatheredShale",
+  name: "Gathered Shale",
+  passable: true,
+};
+
+const shaleTerrain: TerrainType = {
+  id: "shale",
+  name: "Shale",
+  passable: true,
+  gatherInfo: {
+    itemYields: [items.ligament, items.spinalCord],
+    gatheredTerrain: gatheredShaleTerrain,
+    harvestChance: 0.5,
+  },
+};
+
+const gatheredSulfuricRockTerrain: TerrainType = {
+  id: "gatheredSulfuricRock",
+  name: "Gathered Sulfuric Rock",
+  passable: true,
+};
+
+const sulfuricRockTerrain: TerrainType = {
+  id: "sulfuricRock",
+  name: "Sulfuric Rock",
+  passable: true,
+  gatherInfo: {
+    itemYields: [items.femur, items.ligament],
+    gatheredTerrain: gatheredSulfuricRockTerrain,
+    harvestChance: 0.5,
+  },
+};
+
+const gatheredMudTerrain: TerrainType = {
+  id: "gatheredMud",
+  name: "Gathered Mud",
+  passable: true,
+};
+
+const mudTerrain: TerrainType = {
+  id: "mud",
+  name: "Mud",
+  passable: true,
+  gatherInfo: {
+    itemYields: [items.toe, items.tibia],
+    gatheredTerrain: gatheredMudTerrain,
+    harvestChance: 0.5,
+  },
 };
 
 const waterTerrain: TerrainType = {
@@ -80,11 +155,16 @@ export function naturalTerrainAt(
   // seeds would start inside a lake or walled into a pocket.
   const height = 0.5 + (raw - 0.5) * Math.min(1, Math.hypot(x, y) / 10);
   if (height < 0.3) return waterTerrain;
+  if (height < 0.35) return mudTerrain;
   if (height > 0.7) return rockyTerrain;
 
-  const noiseValue = noise(seed + 2, x, y, 6);
+  const sulfuricNoiseValue = noise(seed + 2, x, y, 8);
+  if (sulfuricNoiseValue < 0.10) return sulfuricRockTerrain;
+
+  const noiseValue = noise(seed + 3, x, y, 6);
   if (noiseValue < 0.35) return gravelTerrain;
   if (noiseValue < 0.65) return sandstoneTerrain;
+  if (height > 0.5) return shaleTerrain;
   return sandTerrain;
 }
 
@@ -101,7 +181,19 @@ export function checkTerrainChanged(
   return undefined;
 }
 
-export function isPassable(terrain: TerrainType): boolean {
+export function isPassable(
+  terrain: TerrainType,
+  inventory: ItemStack[],
+): boolean {
+  if (terrain.itemToPass !== undefined && !terrain.passable) {
+    for (const itemStack of inventory) {
+      if (itemStack.type === terrain.itemToPass) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   return terrain.passable;
 }
 
@@ -124,6 +216,22 @@ export function willHarvestItem(
   }
 
   return true;
+}
+
+export function getHarvestedItem(
+  seed: number,
+  x: number,
+  y: number,
+  terrain: TerrainType,
+): ItemType | null {
+  if (terrain.gatherInfo === undefined) {
+    return null;
+  }
+
+  let randomValue = gridValue(seed + 1, x, y);
+  randomValue *= terrain.gatherInfo.itemYields.length;
+  const flooredIndex = Math.floor(randomValue);
+  return terrain.gatherInfo.itemYields[flooredIndex];
 }
 
 // Value noise: random numbers at coarse grid points, blended between them, so

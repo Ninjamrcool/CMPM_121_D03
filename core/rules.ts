@@ -3,6 +3,7 @@
 // apply() decides how, or whether, to show them over time.
 
 import {
+  getHarvestedItem,
   isPassable,
   terrainAt,
   type TerrainType,
@@ -83,7 +84,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const to: Cell = { x: from.x + step.x, y: from.y + step.y };
 
   const terrain = terrainAt(state.changedCells, state.seed, to.x, to.y);
-  if (!isPassable(terrain)) {
+  if (!isPassable(terrain, state.inventory)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
 
@@ -121,7 +122,22 @@ function gather(state: GameState): GameEvent[] {
     }];
   }
 
-  const itemYieldType = terrain.gatherInfo.itemYield;
+  const itemYieldType = getHarvestedItem(
+    state.seed,
+    state.player.x,
+    state.player.y,
+    terrain,
+  );
+  if (itemYieldType === null) {
+    return [{
+      type: "gathered",
+      at: gatherPosition,
+      item: undefined,
+      inventory: copyInventory(state.inventory),
+      changedCell: { ...changedCell, cell: { ...changedCell.cell } },
+    }];
+  }
+
   addItemStackToInventory(state.inventory, {
     type: itemYieldType,
     stackSize: 1,

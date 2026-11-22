@@ -54,6 +54,13 @@ export const tailRecipe: Recipe = {
   result: { type: items.tail, stackSize: 1 },
 };
 
+export const boneLadderRecipe: Recipe = {
+  items: [
+    { type: items.leg, stackSize: 2 },
+  ],
+  result: { type: items.boneLadder, stackSize: 1 },
+};
+
 export const recipes = {
   dinosaur: dinosaurRecipe,
   head: headRecipe,
@@ -61,6 +68,7 @@ export const recipes = {
   ribcage: ribcageRecipe,
   leg: legRecipe,
   tail: tailRecipe,
+  boneLadder: boneLadderRecipe,
 };
 
 export const recipesList = Object.values(recipes);
