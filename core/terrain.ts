@@ -132,6 +132,25 @@ const waterTerrain: TerrainType = {
   passable: false,
 };
 
+export const terrainTypes = {
+  sandstone: sandstoneTerrain,
+  gatheredGravel: gatheredGravelTerrain,
+  gravel: gravelTerrain,
+  gatheredSand: gatheredSandTerrain,
+  sand: sandTerrain,
+  gatheredRocky: gatheredRockyTerrain,
+  rocky: rockyTerrain,
+  gatheredShale: gatheredShaleTerrain,
+  shale: shaleTerrain,
+  gatheredSulfuricRock: gatheredSulfuricRockTerrain,
+  sulfuricRock: sulfuricRockTerrain,
+  gatheredMud: gatheredMudTerrain,
+  mud: mudTerrain,
+  water: waterTerrain,
+};
+
+export const terrainTypesList = Object.values(terrainTypes);
+
 export function terrainAt(
   changedCells: ChangedCell[],
   seed: number,

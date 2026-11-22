@@ -57,3 +57,12 @@ Deno.test("crafting is unsuccessful when inventory lacks required items", () => 
     result: { type: items.tail, stackSize: 1 },
   }]);
 });
+
+Deno.test("gather event position remains unchanged after subsequent move commands", () => {
+  const state = generateVertebraeState(16);
+
+  const event = apply(state, { type: "gather" });
+  const eventCopy = event;
+  apply(state, { type: "gather" });
+  assertEquals(event[0], eventCopy[0]);
+});

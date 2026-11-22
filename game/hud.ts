@@ -26,7 +26,7 @@ function describe(event: GameEvent): string {
     case "crafted":
       return `Crafted ${event.result.type.name} x${event.result.stackSize}`;
     case `failedCraft`:
-      return `Failed to craft ${event.result.type.name}, not enough items`;
+      return `Failed to craft ${event.result.type.name}, missing some items`;
   }
 }
 
