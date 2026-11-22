@@ -34,7 +34,9 @@ const NOTES: Record<SoundName, Note[]> = {
   ],
   dig: [
     { frequency: 100, seconds: 0.1, wave: "sawtooth" },
-    { frequency: 200, seconds: 0.1, wave: "sawtooth", at: 0.1 },
+    { frequency: 112, seconds: 0.1, wave: "sawtooth", at: 0.1 },
+    { frequency: 100, seconds: 0.1, wave: "sawtooth", at: 0.2 },
+    { frequency: 200, seconds: 0.1, wave: "sawtooth", at: 0.3 },
   ],
 };
 

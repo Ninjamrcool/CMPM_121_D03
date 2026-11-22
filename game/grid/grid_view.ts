@@ -15,6 +15,9 @@ const VIEW_WIDTH = 1000;
 const VIEW_HEIGHT = 750;
 const WALK_MS = 120;
 const BUMP_MS = 60;
+const SPIN_MS = 350;
+const SHAKE_MS = 120;
+const SHAKE_ANGLE = 20;
 const PLAYER_BODY_COLOR = 0xE8B672;
 const PLAYER_EYE_COLOR = 0x383838;
 const PLAYER_EYE_DISTANCE_FROM_CENTER = -11;
@@ -24,9 +27,9 @@ const BUMP_COLOR = 0xe0533d;
 
 const DIRECTION_ANGLES: Record<Direction, number> = {
   north: 0,
-  south: 180,
+  south: -180,
   east: 90,
-  west: 270,
+  west: -90,
 };
 
 const TERRAIN_COLORS: Record<string, number> = {
@@ -133,9 +136,9 @@ export class GridView extends Phaser.Scene {
       case "gathered":
         this.changedCells.push(event.changedCell);
         this.drawCellsAround(event.at);
-        return Promise.resolve();
+        return this.spin();
       case "failedGather":
-        return Promise.resolve();
+        return this.shake();
       case "crafted":
         return Promise.resolve();
       case "failedCraft":
@@ -148,14 +151,23 @@ export class GridView extends Phaser.Scene {
   }
 
   private walk(to: Cell, direction: Direction): Promise<void> {
-    this.player.angle = DIRECTION_ANGLES[direction];
+    let angleDifference = this.player.angle - DIRECTION_ANGLES[direction];
+    if (angleDifference > 180) {
+      angleDifference -= 360;
+    } else if (angleDifference < -180) {
+      angleDifference += 360;
+    }
 
     return new Promise((done) => {
       this.tweens.add({
         targets: this.player,
         ...cellCenter(to),
+        angle: this.player.angle - angleDifference,
         duration: WALK_MS,
-        onComplete: () => done(),
+        onComplete: () => {
+          this.player.angle = DIRECTION_ANGLES[direction];
+          done();
+        },
       });
     });
   }
@@ -175,6 +187,42 @@ export class GridView extends Phaser.Scene {
         onComplete: () => {
           this.playerBody.setFillStyle(PLAYER_BODY_COLOR);
           done();
+        },
+      });
+    });
+  }
+
+  private spin(): Promise<void> {
+    return new Promise((done) => {
+      this.tweens.add({
+        targets: this.player,
+        angle: this.player.angle + 360,
+        duration: SPIN_MS,
+        onComplete: () => done(),
+      });
+    });
+  }
+
+  private shake(): Promise<void> {
+    return new Promise((done) => {
+      this.tweens.add({
+        targets: this.player,
+        angle: this.player.angle + SHAKE_ANGLE,
+        duration: SHAKE_MS / 4,
+        onComplete: () => {
+          this.tweens.add({
+            targets: this.player,
+            angle: this.player.angle - SHAKE_ANGLE * 2,
+            duration: SHAKE_MS / 2,
+            onComplete: () => {
+              this.tweens.add({
+                targets: this.player,
+                angle: this.player.angle + SHAKE_ANGLE,
+                duration: SHAKE_MS / 4,
+                onComplete: () => done(),
+              });
+            },
+          });
         },
       });
     });
