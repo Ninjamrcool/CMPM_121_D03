@@ -10,8 +10,6 @@ import {
   willHarvestItem,
 } from "./mod.ts";
 
-// 3 tests, 1 to check it doesnt allow you in before, one to make sure that you can go in after, on  to make sure that you can harvest after removed
-
 const SEED = 121;
 
 function blockedByItemCell(
@@ -31,6 +29,7 @@ function blockedByItemCell(
         player: { x, y: 0 },
         changedCells: [],
         inventory: [],
+        gameEnded: false,
       };
     }
   }

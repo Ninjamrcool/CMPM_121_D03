@@ -27,6 +27,7 @@ export type GameState = {
   player: Cell;
   changedCells: ChangedCell[];
   inventory: ItemStack[];
+  gameEnded: boolean;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -48,7 +49,8 @@ export type GameEvent =
   }
   | { type: "failedGather"; at: Cell }
   | { type: "crafted"; result: ItemStack; inventory: ItemStack[] }
-  | { type: "failedCraft"; result: ItemStack };
+  | { type: "failedCraft"; result: ItemStack }
+  | { type: "gameEnded" };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -59,11 +61,21 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, changedCells: [], inventory: [] };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    changedCells: [],
+    inventory: [],
+    gameEnded: false,
+  };
 }
 
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
+  if (state.gameEnded) {
+    return [];
+  }
+
   switch (command.type) {
     case "move":
       return move(state, command.direction);
@@ -193,6 +205,18 @@ function craft(state: GameState, recipe: Recipe): GameEvent[] {
     }
   }
   addItemStackToInventory(state.inventory, { ...recipe.result });
+
+  if (recipe.finishesGame === true) {
+    state.gameEnded = true;
+    return [
+      {
+        type: "crafted",
+        result: { ...recipe.result },
+        inventory: copyInventory(state.inventory),
+      },
+      { type: "gameEnded" },
+    ];
+  }
 
   return [{
     type: "crafted",

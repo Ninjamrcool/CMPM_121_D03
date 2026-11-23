@@ -27,6 +27,8 @@ function describe(event: GameEvent): string {
       return `Crafted ${event.result.type.name} x${event.result.stackSize}`;
     case `failedCraft`:
       return `Failed to craft ${event.result.type.name}, missing some items`;
+    case `gameEnded`:
+      return `You successfully assembled the dinosaur!`;
   }
 }
 
@@ -52,6 +54,8 @@ export class Hud {
       this.updateInventory(event.inventory);
     } else if (event.type === "crafted") {
       this.updateInventory(event.inventory);
+    } else if (event.type === "gameEnded") {
+      element("banner").hidden = false;
     }
   }
 

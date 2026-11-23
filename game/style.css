@@ -23,7 +23,7 @@ body {
   perspective: 1200px;
 }
 
-#grid canvas {
+#canvas canvas {
   display: block;
   border: 6px solid #A17230;
   border-radius: 4px;
@@ -94,12 +94,12 @@ button {
   perspective: 1200px;
 }
 
-#grid canvas,
-#grid::after {
+#canvas canvas,
+#canvas::after {
   transform: rotateX(6deg);
 }
 
-#grid::after {
+#canvas::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -110,4 +110,32 @@ button {
     transparent 55%,
     rgb(0 0 0 / 0.5) 100%
   );
+}
+
+#banner {
+  position: absolute;
+  inset: 22% -6% auto;
+  gap: 6px;
+  padding: 14px;
+  text-align: center;
+  background: linear-gradient(90deg, transparent, rgba(184, 142, 93, 1.0) 45%
+    55%,
+    transparent);
+  pointer-events: none;
+}
+
+#banner:not([hidden]) {
+  display: grid;
+}
+
+#banner strong {
+  letter-spacing: 0.12em;
+  color: #262a31;
+  font-size: large;
+}
+
+#banner span {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: #3a3f48;
 }

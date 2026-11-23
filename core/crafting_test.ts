@@ -12,6 +12,7 @@ function generateVertebraeState(numVertebrae: number): GameState {
     inventory: numVertebrae !== 0
       ? [{ type: items.vertebrae, stackSize: numVertebrae }]
       : [{ type: items.vertebrae, stackSize: 3 }],
+    gameEnded: false,
   };
 }
 

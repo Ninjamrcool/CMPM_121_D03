@@ -3,6 +3,7 @@ import { items, ItemStack } from "./items.ts";
 export interface Recipe {
   items: ItemStack[];
   result: ItemStack;
+  finishesGame?: boolean;
 }
 
 export const dinosaurRecipe: Recipe = {
@@ -11,8 +12,10 @@ export const dinosaurRecipe: Recipe = {
     { type: items.neck, stackSize: 1 },
     { type: items.ribcage, stackSize: 1 },
     { type: items.leg, stackSize: 4 },
+    { type: items.tail, stackSize: 1 },
   ],
   result: { type: items.dinosaur, stackSize: 1 },
+  finishesGame: true,
 };
 
 export const headRecipe: Recipe = {

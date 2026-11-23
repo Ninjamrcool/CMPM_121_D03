@@ -18,7 +18,7 @@ const hud = new Hud(state);
 const sounds = new Sounds(
   document.getElementById("mute") as HTMLButtonElement,
 );
-const grid = await startGridView(document.getElementById("grid")!, state);
+const grid = await startGridView(document.getElementById("canvas")!, state);
 const presenter = new Presenter([grid, hud, sounds]);
 const controller = new Controller(state, presenter);
 const recipeList = new RecipeList(
