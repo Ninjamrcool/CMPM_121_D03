@@ -206,7 +206,7 @@ export function isPassable(
 ): boolean {
   if (terrain.itemToPass !== undefined && !terrain.passable) {
     for (const itemStack of inventory) {
-      if (itemStack.type === terrain.itemToPass) {
+      if (itemStack.type.id === terrain.itemToPass.id) {
         return true;
       }
     }

@@ -172,7 +172,7 @@ export function itemsNeededToCraft(
 
   for (const requiredItem of recipe.items) {
     const inventoryItem = inventory.find(
-      (item) => item.type === requiredItem.type,
+      (item) => item.type.id === requiredItem.type.id,
     );
     if (!inventoryItem) {
       addItemStackToInventory(itemsNeeded, requiredItem);
@@ -228,7 +228,7 @@ function craft(state: GameState, recipe: Recipe): GameEvent[] {
 function addItemStackToInventory(inventory: ItemStack[], itemStack: ItemStack) {
   const itemType = itemStack.type;
   for (const inventoryItemStack of inventory) {
-    if (inventoryItemStack.type === itemType) {
+    if (inventoryItemStack.type.id === itemType.id) {
       inventoryItemStack.stackSize += itemStack.stackSize;
       return;
     }
