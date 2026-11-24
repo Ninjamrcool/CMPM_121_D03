@@ -5,7 +5,9 @@ type SoundName =
   | "bump"
   | "fail"
   | "chime"
-  | "dig";
+  | "dig"
+  | "craft"
+  | "failedCraft";
 
 // Which sound each event plays. A new event fails to type-check until it has an entry.
 const SOUND_FOR: Record<GameEvent["type"], SoundName | null> = {
@@ -13,9 +15,9 @@ const SOUND_FOR: Record<GameEvent["type"], SoundName | null> = {
   blocked: "bump",
   gathered: "dig",
   failedGather: "fail",
-  crafted: null,
-  failedCraft: null,
-  gameEnded: null,
+  crafted: "craft",
+  failedCraft: "failedCraft",
+  gameEnded: "chime",
 };
 
 type Note = {
@@ -39,6 +41,8 @@ const NOTES: Record<SoundName, Note[]> = {
     { frequency: 100, seconds: 0.1, wave: "sawtooth", at: 0.2 },
     { frequency: 200, seconds: 0.1, wave: "sawtooth", at: 0.3 },
   ],
+  craft: [{ frequency: 250, seconds: 0.2, wave: "triangle" }],
+  failedCraft: [{ frequency: 50, seconds: 0.2, wave: "triangle" }],
 };
 
 const VOLUME = 0.12;

@@ -1,5 +1,12 @@
-import { assertEquals } from "@std/assert";
-import { apply, copyInventory, type GameState, items, recipes } from "./mod.ts";
+import { assertEquals, fail } from "@std/assert";
+import {
+  apply,
+  copyInventory,
+  type GameState,
+  items,
+  recipes,
+  recipesList,
+} from "./mod.ts";
 
 // Each test has a Given-When-Then shape: https://martinfowler.com/bliki/GivenWhenThen.html
 const SEED = 121;
@@ -66,4 +73,16 @@ Deno.test("gather event position remains unchanged after subsequent move command
   const eventCopy = event;
   apply(state, { type: "gather" });
   assertEquals(event[0], eventCopy[0]);
+});
+
+Deno.test("recipes list does not have any recipes with duplicate item types", () => {
+  for (const recipe of recipesList) {
+    const recipeIDs: Set<string> = new Set();
+    for (const recipeInput of recipe.items) {
+      if (recipeIDs.has(recipeInput.type.id)) {
+        fail(`Duplicate ${recipeInput.type.id} found in recipesList`);
+      }
+      recipeIDs.add(recipeInput.type.id);
+    }
+  }
 });
